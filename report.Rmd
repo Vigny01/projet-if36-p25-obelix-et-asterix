@@ -1,3 +1,15 @@
+## Introduction
+
+### Contexte et objectif
+
+Dans le cadre de ce projet, nous avons travaillé avec **deux jeux de données différents mais complémentaires**. Ces données permettent d’explorer plusieurs aspects du commerce de détail : les ventes, les produits, les clients, la rentabilité, etc.
+
+- Le premier fichier, appelé *Superstore*, regroupe presque 10 000 lignes de commandes passées dans une entreprise fictive de e-commerce.
+- Le second fichier, basé sur des ventes dans des magasins Walmart, contient des données orientées “point de vente” : horaires, satisfaction client, modes de paiement...
+
+L’objectif est de **mener une exploration** sur les données. Nous avons voulu comprendre comment ces systèmes fonctionnent, ce qui génère du profit ou non, et peut-être découvrir des profils de clients, des tendances d’achat ou des produits phares.
+
+
 ## Question 3 : Est-ce qu’une réduction fait toujours gagner de l’argent ?
 
 ### Méthode
