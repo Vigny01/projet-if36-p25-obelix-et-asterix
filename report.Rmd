@@ -23,13 +23,13 @@ Notre approche comporte plusieurs étapes :
 
 #### Partie 1 - Scatter plot : Discount vs Profit
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r}
 library(ggplot2)
 library(dplyr)
 library(readr)
 
 # Lire les données Superstore
-superstore <- read_csv("data/superstore.csv")
+superstore <- read_csv("data/superstore.csv", show_col_types = FALSE)
 
 # Visualiser Discount vs Profit avec une courbe de tendance
 ggplot(superstore, aes(x = Discount, y = Profit)) +
