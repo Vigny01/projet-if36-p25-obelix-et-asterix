@@ -2,22 +2,21 @@
 
 ### Méthode
 
-Pour répondre à cette question, nous exploitons le jeu de données **Superstore**, qui contient deux variables clés :
-- `Discount` : le taux de remise appliqué sur chaque vente (entre 0% et 80%).
-- `Profit` : le bénéfice réalisé sur chaque vente.
+Pour répondre à cette question, nous exploitons le jeu de données **Superstore**, qui contient deux variables clés :  
+- `Discount` : le taux de remise appliqué sur chaque vente (entre 0% et 80%).  
+- `Profit` : le bénéfice réalisé sur chaque vente.  
 
 Notre approche comporte plusieurs étapes :
 
 1. **Analyse exploratoire initiale** :  
-   Nous utilisons d'abord un **scatter plot** (nuage de points) combiné à une **courbe de régression linéaire** pour observer la tendance globale entre le taux de remise et le profit.
+   Nous utilisons d'abord un scatter plot combiné à une courbe de régression linéaire pour observer la tendance globale entre le taux de remise et le profit.
 
 2. **Approfondissement avec une analyse catégorielle** :  
-   Afin d'aller plus loin et mieux comprendre l'impact des différents niveaux de remise, nous introduisons un **boxplot** par groupe de taux de remise.
+   Afin d'aller plus loin et mieux comprendre l'impact des différents niveaux de remise, nous introduisons un boxplot par groupe de taux de remise.
 
-**Pourquoi utiliser également un boxplot ?**
-- Le scatter plot montre la relation générale mais reste dispersé et sensible aux valeurs extrêmes.
-- Le boxplot permet de mieux analyser la **distribution du profit dans chaque catégorie de remise**, en visualisant la médiane, les quartiles et les valeurs atypiques.
-- Cela apporte une vision plus claire et comparative entre les différents niveaux de remise.
+**Pourquoi utiliser également un boxplot ?**  
+- Le boxplot permet de mieux analyser la distribution du profit dans chaque catégorie de remise, en visualisant la médiane, les quartiles et les valeurs atypiques.  
+- Cela apporte une vision plus claire et comparative entre les différents niveaux de remise.  
 
 ### Visualisation
 
@@ -71,39 +70,39 @@ ggplot(superstore_clean, aes(x = Discount_Group, y = Profit, fill = Discount_Gro
 
 
 
-## Analyse graphique
+### Analyse graphique
 
-### Avec le scatter plot :
+#### Avec le scatter plot :
 
 - On observe une **tendance globale légèrement négative** entre le taux de remise et le profit.
 - Plus la remise augmente, plus les profits tendent à baisser.
 
-### Avec le boxplot :
+#### Avec le boxplot :
 
 - La **structure des données** devient plus claire.
 - Jusqu'à **20% de remise**, les profits restent majoritairement **positifs**.
 - Dès que la remise dépasse **40%**, la **médiane du profit devient négative**.
 - La **variabilité augmente fortement** avec les remises élevées.
 
-### Différence entre Scatter plot et Boxplot pour ce problème :
+#### Différence entre Scatter plot et Boxplot pour ce problème :
 
 Le **boxplot** permet de **comparer proprement les profits** selon des niveaux précis de remise, en mettant en évidence :
 
 - Les tendances centrales (**médiane**)
 - La dispersion (**écart interquartile**)
 
-## Résultat
+### Résultat
 
-- Sans remise ou avec une remise légère (**0%-20%**), les ventes restent **rentables** dans l'ensemble.
-- Dès que la remise atteint **20%-40%**, la rentabilité **diminue**.
-- Pour des remises supérieures à **40%**, les **pertes deviennent la norme** pour la majorité des transactions.
+- Sans remise ou avec une remise légère (**0%-20%**), les ventes restent rentables dans l'ensemble.
+- Dès que la remise atteint **20%-40%**, la rentabilité diminue.
+- Pour des remises supérieures à **40%**, les pertes deviennent la norme pour la majorité des transactions.
 
-## Conclusion
+### Conclusion
 
 Notre étude démontre que :
 
-- **Accorder une réduction importante ne garantit pas un profit** ; au contraire, cela augmente significativement le risque de pertes.
+- Accorder une réduction importante ne garantit pas un profit ; au contraire, cela augmente significativement le risque de pertes.
 - Le **scatter plot** a permis de détecter une tendance générale.
-- Le **boxplot** a confirmé et précisé que **les remises élevées mènent à des profits négatifs**.
+- Le **boxplot** a confirmé et précisé que les remises élevées mènent à des profits négatifs.
 
 
