@@ -93,7 +93,7 @@ Les outils utilisés :
 
 ## Questions de recherche
 
-|    # | Question (niveau enfant de 12 ans)                           | Variables utilisées                  | Visualisation | Objectif      |
+|    # | Question                            | Variables utilisées                  | Visualisation | Objectif      |
 | ---: | ------------------------------------------------------------ | ------------------------------------ | ------------- | ------------- |
 |    1 | Quel groupe de clients gagne le plus d’argent ?              | Segment, Profit (Superstore)         | Boxplot       | Comparer      |
 |    2 | Est-ce qu’on vend plus certains jours ?                      | day_name, total (Walmart)            | Bar chart     | Évolution     |
