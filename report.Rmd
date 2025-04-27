@@ -130,5 +130,56 @@ Notre analyse montre que :
 - Le **boxplot** a confirmé et précisé que les remises élevées entraînent majoritairement des profits négatifs.
 
 
+## Question 4 :Quels produits rapportent le plus ?
+
+### Méthode
+
+Pour répondre à cette question,Nous nous concentrerons principalement sur deux paramètres : 
+**product_line** : ce paramètre nous informe sur le type de produit, et **gross_income** : ce paramètre nous indique le bénéfice généré par le produit.
+
+Nous utiliserons un diagramme en barres pour analyser les données, car les catégories de produits possèdent plusieurs étiquettes différentes, tandis que le revenu des produits est une valeur unique. Après avoir trié les données, la comparaison entre les produits sera également plus intuitive.
+
+### Visualisation
+
+#### Bar chart: product_line et gross_income
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+library(dplyr)
+library(readr)
+library(ggplot2)
+library(scales)  # 记得先加载 scales 包
+
+data <- read_delim(
+  "../data/WalmartSQL repository..csv",
+  delim = ";"
+)
+
+result <- data %>%
+  group_by(product_line) %>%
+  summarise(total_gross_income = sum(gross_income, na.rm = TRUE)) %>%
+  arrange(desc(total_gross_income))
+
+
+ggplot(result, aes(x = reorder(product_line, total_gross_income), y = total_gross_income)) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  coord_flip() + 
+  labs(title = "Revenu total par catégorie de produits",
+       x = '',
+       y = "Revenu brut (en dollars)") +
+  scale_y_continuous(labels = dollar) +
+  geom_text(aes(label = dollar(total_gross_income)), 
+            position = position_stack(vjust = 0.5),
+            size = 4, color = "white") +  
+  theme_minimal()
+```
+
+
+## Résultat et Conclusion
+
+Nous pouvons observer que les produits du supermarché Walmart sont répartis en six catégories. Parmi celles-ci, la vente de food and beverages génère le bénéfice le plus élevé, tandis que health and beauty génère le bénéfice le plus faible.
+Toutefois, il est important de noter que l'écart entre eux n'est pas très important. Pour certains produits, la différence de bénéfices ne dépasse même pas 2%. De plus, tous les bénéfices dépassent 2000 dollars. Étant donné que les données collectées peuvent être influencées par le contexte social et d'autres facteurs à l'époque, nous pouvons conclure qu'au premier trimestre de 2019, la vente de food and beverages générait les bénéfices les plus élevés.
+
+
+
+
 
 
