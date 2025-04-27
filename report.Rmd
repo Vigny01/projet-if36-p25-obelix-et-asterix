@@ -147,7 +147,7 @@ Nous utiliserons un diagramme en barres pour analyser les données, car les cat�
 library(dplyr)
 library(readr)
 library(ggplot2)
-library(scales)  # 记得先加载 scales 包
+library(scales)
 
 data <- read_delim(
   "data/WalmartSQL repository..csv",
