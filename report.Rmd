@@ -142,15 +142,17 @@ Nous utiliserons un diagramme en barres pour analyser les données, car les cat�
 ### Visualisation
 
 #### Bar chart: product_line et gross_income
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+```{r}
 library(dplyr)
 library(readr)
 library(ggplot2)
 library(scales)  # 记得先加载 scales 包
 
 data <- read_delim(
-  "../data/WalmartSQL repository..csv",
-  delim = ";"
+  "data/WalmartSQL repository..csv",
+  delim = ";", 
+  show_col_types = FALSE
 )
 
 result <- data %>%
@@ -173,7 +175,7 @@ ggplot(result, aes(x = reorder(product_line, total_gross_income), y = total_gros
 ```
 
 
-## Résultat et Conclusion
+### Résultat et Conclusion
 
 Nous pouvons observer que les produits du supermarché Walmart sont répartis en six catégories. Parmi celles-ci, la vente de food and beverages génère le bénéfice le plus élevé, tandis que health and beauty génère le bénéfice le plus faible.
 Toutefois, il est important de noter que l'écart entre eux n'est pas très important. Pour certains produits, la différence de bénéfices ne dépasse même pas 2%. De plus, tous les bénéfices dépassent 2000 dollars. Étant donné que les données collectées peuvent être influencées par le contexte social et d'autres facteurs à l'époque, nous pouvons conclure qu'au premier trimestre de 2019, la vente de food and beverages générait les bénéfices les plus élevés.
