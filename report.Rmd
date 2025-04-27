@@ -47,7 +47,7 @@ Notre approche comporte plusieurs étapes :
 
 #### Partie 1 - Scatter plot : Discount vs Profit
 
-```{r}
+```{r message=FALSE}
 library(ggplot2)
 library(dplyr)
 library(readr)
@@ -143,7 +143,7 @@ Nous utiliserons un diagramme en barres pour analyser les données, car les cat�
 
 #### Bar chart: product_line et gross_income
 
-```{r}
+```{r message=FALSE}
 library(dplyr)
 library(readr)
 library(ggplot2)
