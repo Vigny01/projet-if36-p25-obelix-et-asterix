@@ -1,3 +1,14 @@
+---
+title: 'Analyse croisée : Superstore & Walmart'
+subtitle: "Obelix et Asterix"
+author: "Membre: TAKAM TALLA Vigny Brayan, Arthur KAMGA, Chengxian ZHAO, Jianghao LIU"
+date: "2025-04-27"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+---
+
 ## Introduction
 
 ### Contexte et objectif
@@ -7,12 +18,247 @@ Dans le cadre de ce projet, nous avons travaillé avec **deux jeux de données d
 - Le premier fichier, appelé *Superstore*, regroupe presque 10 000 lignes de commandes passées dans une entreprise fictive de e-commerce.
 - Le second fichier, basé sur des ventes dans des magasins Walmart, contient des données orientées “point de vente” : horaires, satisfaction client, modes de paiement...
 
-L’objectif est de **mener une exploration** sur les données. Nous avons voulu comprendre comment ces systèmes fonctionnent, ce qui génère du profit ou non, et peut-être découvrir des profils de clients, des tendances d’achat ou des produits phares.
+L’objectif est de **mener une exploration** sur les données. Nous avons voulu comprendre comment ces systèmes fonctionnent, ce qui génère du profit ou non, et peut-être découvrir des profils de clients, des tendances d’achat ou des produits phares.  
+
+## Structure et nature des données
+
+####  [Données Superstore](https://www.kaggle.com/datasets/aksha17/superstore-sales)
+
+Ce fichier CSV contient **9994 lignes** et **21 variables**. Il s’agit d’un historique de ventes avec des informations sur les commandes, les clients, les produits et la logistique.
+
+**Variables numériques :**
+
+- `Sales` : montant de la vente.
+- `Quantity` : nombre d’unités vendues.
+- `Discount` : remise appliquée.
+- `Profit` : profit net.
+- `Postal Code`, `Row ID` : identifiants.
+
+**Variables temporelles :**
+
+- `Order Date` : date de commande.
+- `Ship Date` : date d’expédition.
+
+**Variables nominales :**
+
+- `Order ID`, `Customer ID`, `Product ID` : identifiants.
+- `Customer Name` : nom du client.
+- `Segment` : type de client.
+- `Region`, `State`, `City` : localisation.
+- `Ship Mode` : mode d’expédition.
+- `Category`, `Sub-Category`, `Product Name` : classification des produits.
+
+
+#### [Données Walmart](https://www.kaggle.com/datasets/antaesterlin/walmart-commerce-data)
+
+Ce fichier CSV contient **1000 transactions** et **20 variables**. Il fournit des données détaillées sur chaque vente : prix, quantité, mode de paiement, heure, etc.
+
+**Variables numériques :**
+
+- `unit_price` : prix unitaire.
+- `quantity` : quantité achetée.
+- `vat` : taxe.
+- `total` : montant total payé.
+- `cogs` : coût du produit.
+- `gross_margin_pct` : pourcentage de marge brute.
+- `gross_income` : bénéfice.
+- `rating` : note du client (sur 10).
+
+**Variables temporelles :**
+
+- `dtme` : date de la vente.
+- `tme` : heure.
+- `time_of_day` : moment (matin, après-midi...).
+- `day_name`, `month_name` : jour et mois de l’achat.
+
+**Variables nominales :**
+
+- `invoice_id` : identifiant de facture.
+- `branch`, `city` : lieu.
+- `customer_type` : type de client.
+- `gender` : genre.
+- `product_line` : type de produit.
+- `payment_method` : moyen de paiement.
+
+
+
+## Chargement des packages et des données
+```{r message=FALSE}
+library(ggplot2)
+library(dplyr)
+library(readr)
+library(lubridate)
+library(patchwork) # important pour combiner les plots
+Sys.setlocale("LC_TIME", "fr_FR.UTF-8")
+
+# Importer les données
+superstore <- read_csv("data/superstore.csv")
+walmart <- read_delim("data/Walmart.csv", delim = ";")
+walmart_time <-walmart
+```
+## Question 1
+
+1. Problématique
+
+**Questions posées :**
+
+- Quel est le genre des clients qui achetent le plus ?
+- Comment les ventes varient-elles selon le segment de clientèle (Consumer, Corporate, Home Office) ?
+
+**Réponse imaginée :**
+
+On pourrait s’attendre à ce qu’un genre dépense légèrement plus que l’autre.
+
+Concernant les segments, il est possible que les consommateurs génèrent plus de ventes que les autres catégories de clients.
+
+- **Titre** : Dépenses par Genre (Walmart)
+  
+- **Axes** :
+  - **X** : Genre (Female, Male)
+  - **Y** : Montant total des dépenses
+
+- **Légende** : Genre (rose pour Female, bleu pour Male)
+
+- Outliers (points rouges)
+- Médiane (trait central du boxplot)
+
+### Graphique 2 (à droite) :
+
+- **Titre** : Montant des ventes par Segment (Superstore)
+  
+- **Axes** :
+  - **X** : Segment (Consumer, Corporate, Home Office)
+  - **Y** : Montant des ventes
+
+- **Légende** : Segment (couleurs différentes pour chaque segment)
+  - Outliers(points rouges)
+  - Médiane représentée (trait central du boxplot)
+
+
+
+
+```{r }
+
+# Créer les deux graphiques
+plot1 <- ggplot(walmart, aes(x = gender, y = total, fill = gender)) +
+  geom_boxplot(outlier.color = "red", outlier.size = 1.5) +
+  stat_summary(fun = mean, geom = "point", shape = 23, size = 4, fill = "yellow") +
+  coord_cartesian(ylim = c(0, 1500)) +
+  labs(title = "Ventes par genre de client") +
+  theme_minimal()
+
+plot2 <- ggplot(superstore, aes(x = Segment, y = Sales, fill = Segment)) +
+  geom_boxplot(outlier.color = "red", outlier.size = 1.5) +
+  stat_summary(fun = mean, geom = "point", shape = 23, size = 4, fill = "yellow") +
+  coord_cartesian(ylim = c(0, 1500)) +
+  labs(title = "Ventes par Segment de clients") +
+  theme_minimal()
+
+# Les afficher côte à côte
+(plot1 + plot2) + 
+  plot_layout(widths = c(1, 2))
+```
+
+### Analyse du premier graphique :
+
+En observant les dépenses par genre, on remarque que les femmes ont tendance à dépenser légèrement plus que les hommes, bien que la dispersion des dépenses soit assez similaire entre les deux groupes. Il y a également plusieurs points aberrants, ce qui suggère qu'il existe des clients ayant des dépenses particulièrement élevées dans les deux catégories. Cette différence de dépenses entre les genres semble donc présente, bien que limitée. Cependant, cela soulève une question intéressante : Quel rôle pourrait jouer le type de produit acheté dans ces écarts de dépenses ?
+
+### Analyse du deuxième graphique :
+
+Pour le graphique des ventes par segment, on remarque que les médianes sont assez proches entre les segments "Consumer", "Corporate" et "Home Office". Cependant, la distribution des ventes est assez similaire pour tous les segments, avec une forte présence de points aberrants vers le haut. Le segment "Consumer" semble légèrement en tête, générant davantage de ventes élevées que les autres. Cela dit, les différences entre les segments ne sont pas énormes.
+
+### Question : Quels produits sont beaucoup achetés ?
+
+**Données utilisées** : `product_line` et `quantity` (jeu de données Walmart)
+
+---
+
+### Méthode
+
+Pour répondre on a:
+
+- Utiliser **product_line** pour identifier les produits.
+- Utiliser **quantity** pour mesurer combien de fois chaque produit a été acheté.
+- Additionner les quantités par type de produit.
+- Classer les produits du plus acheté au moins acheté
+
+---
+
+### Visualisation : Produits les plus achetés
+
+```{r}
+library(dplyr)
+# Calculer la quantité totale par type de produit
+produits_walmart <- walmart %>%
+  group_by(product_line) %>%
+  summarise(Total_Quantity = sum(quantity, na.rm = TRUE)) %>%
+  arrange(desc(Total_Quantity))
+
+# Créer le graphique
+ggplot(produits_walmart, aes(x = reorder(product_line, Total_Quantity), y = Total_Quantity)) +
+  geom_col(fill = "skyblue") +
+  coord_flip() +
+  labs(title = "Produits les plus achetés chez Walmart",
+       x = "Produit",
+       y = "Quantité totale achetée") +
+  theme_minimal()
+```
+
+## Question 2: Est-ce que certains jours génèrent plus de ventes que d'autres ?
+
+Pour répondre à cette question, nous allons étudié deux jeux de données : Superstore, qui concerne les ventes entre entreprises (B2B), et Walmart, qui concerne les ventes aux particuliers (B2C). L'approche a utilisé se structure de la manière suivante : d'abord, nous allons extraire le jour de la semaine à partir de la date de chaque commande. Ensuite, nous allons additionner les ventes totales pour chaque jour. Enfin, nous allons représenter ces résultats sous forme de graphiques en barres (barplots). Nous espérons obtenir après cette analyse, qu'il y aura: une activité principalement concentrée dans la semaine pour Superstore, et des ventes plus élevées le week-end pour Walmart
+
+### Superstore - Ventes par jour de la semaine
+```{r}
+superstore <- superstore %>%
+  mutate(Order_Date = as.Date(`Order Date`, format="%d-%m-%y"),
+         DayOfWeek = weekdays(Order_Date)) %>%
+  group_by(DayOfWeek) %>%
+  summarise(Total_Sales = sum(Sales, na.rm = TRUE))
+
+superstore$DayOfWeek <- factor(superstore$DayOfWeek,
+                               levels = c("lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"))
+
+ggplot(superstore, aes(x = DayOfWeek, y = Total_Sales)) +
+  geom_col(fill="steelblue") +
+  geom_text(aes(label = round(Total_Sales, 0)), vjust = -0.5) +
+  labs(title = "Superstore : Ventes par jour de la semaine", x = "Jour", y = "Ventes ($)") +
+  theme_minimal()
+```
+
+### Analyse
+
+On constate sur le graphique que: le mercredi, il y a très peu de ventes, le lundi et le vendredi il y a plus de vente. Cela s’explique premièrement par le fait que Superstore vend principalement à des entreprises. Ensuite, nous pouvons dire après avoir analyser et effectuer des recherches que: le lundi, les entreprises passent beaucoup de commandes pour bien commencer leur semaine. Le vendredi, elles commandent à nouveau pour préparer la semaine suivante. En revanche, le mercredi, tout est déjà organisé, donc il y a naturellement moins de commandes. Le samedi et le dimanche, il y a aussi des ventes, mais un peu moins qu’en début et en fin de semaine.
+
+
+### Walmart - Ventes par jour de la semaine
+
+```{r}
+
+walmart <- walmart %>%
+  mutate(
+    dtme = as.Date(dtme),
+    DayOfWeek = weekdays(dtme)
+  ) %>%
+  group_by(DayOfWeek) %>%
+  summarise(Total_Sales = sum(total, na.rm = TRUE))
+
+walmart$DayOfWeek <- factor(walmart$DayOfWeek,
+                            levels = c("lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"))
+
+ggplot(walmart, aes(x = DayOfWeek, y = Total_Sales)) +
+  geom_col(fill="darkgreen") +
+  geom_text(aes(label = round(Total_Sales, 0)), vjust = -0.5) +
+  labs(title = "Walmart : Ventes par jour de la semaine", x = "Jour", y = "Ventes ($)") +
+  theme_minimal()
+```
+
+### Analyse
+On constate sur le graphique que: le samedi, les gens achètent beaucoup plus que les autres jours. Le dimanche aussi, les ventes restent assez élevées, mais elles sont un peu moins importantes qu'au samedi. En semaine, du lundi au vendredi, les ventes sont plus régulières mais globalement plus faibles que le week-end. Nous pouvons dire après avoir analyser et effectuer des recherches que cela s'explique par le fait que : pendant la semaine, les gens sont souvent occupés par leur travail ou l'école, et ils ont donc moins de temps pour faire leurs courses. Le samedi, en revanche, ils disposent de plus de temps libre, ce qui leur permet d'acheter davantage.
 
 
 ## Question 3 : Est-ce qu’une réduction fait toujours gagner de l’argent ?
 
----
 
 ### Réflexion initiale
 
@@ -95,7 +341,7 @@ ggplot(superstore_clean, aes(x = Discount_Group, y = Profit, fill = Discount_Gro
 
 
 
-### Analyse graphique
+### Analyse
 
 #### Avec le scatter plot :
 
@@ -150,7 +396,7 @@ library(ggplot2)
 library(scales)
 
 data <- read_delim(
-  "data/WalmartSQL repository..csv",
+  "data/Walmart.csv",
   delim = ";", 
   show_col_types = FALSE
 )
@@ -179,6 +425,31 @@ ggplot(result, aes(x = reorder(product_line, total_gross_income), y = total_gros
 
 Nous pouvons observer que les produits du supermarché Walmart sont répartis en six catégories. Parmi celles-ci, la vente de food and beverages génère le bénéfice le plus élevé, tandis que health and beauty génère le bénéfice le plus faible.
 Toutefois, il est important de noter que l'écart entre eux n'est pas très important. Pour certains produits, la différence de bénéfices ne dépasse même pas 2%. De plus, tous les bénéfices dépassent 2000 dollars. Étant donné que les données collectées peuvent être influencées par le contexte social et d'autres facteurs à l'époque, nous pouvons conclure qu'au premier trimestre de 2019, la vente de food and beverages générait les bénéfices les plus élevés.
+
+
+## Question 20 : À quelle heure achète-t-on le plus ?
+
+Pour répondre à cette question, nous allons utiliser le jeu de données Walmart. Deux variables vont être étudiées : tme, qui correspond à l'heure de la transaction, et total, qui indique le montant de la vente. L'approche à utiliser se structure de la manière suivante : d'abord, nous allons extraire l'heure à partir de la variable tme. Ensuite, nous allons additionner les ventes totales pour chaque heure. Enfin, nous allons représenter ces résultats sous forme de graphique en barres (barplot). Nous espérons obtenir après cette analyse qu'il y aura : un pic de ventes autour de midi, et un second pic en fin de journée.
+
+### Walmart - Répartition des ventes par heure
+
+```{r}
+walmart_time <- walmart_time %>%
+  mutate(Hour = hour(hms(tme))) %>%
+  group_by(Hour) %>%
+  summarise(Total_Sales = sum(total, na.rm = TRUE))
+
+ggplot(walmart_time, aes(x = Hour, y = Total_Sales)) +
+  geom_col(fill = "darkblue") +
+  geom_text(aes(label = round(Total_Sales, 0)), vjust = -0.5) +
+  labs(title = "Walmart : Ventes totales par heure", x = "Heure de la journée", y = "Ventes ($)") +
+  scale_x_continuous(breaks = 0:23) +
+  theme_minimal()
+```
+
+### Analyse
+
+On constate sur le graphique que: la plupart des gens font leurs achats surtout autour de midi, entre 12h et 13h et en soirée, entre 18h-19h. L'interprétation qu'on peut faire est que les gens profitent de leur pause déjeuner de midi pour faire quelques courses ou acheter ce dont ils ont besoin rapidement. Aussi en soirée, les gens sortent du travail et s’arrêtent souvent au magasin avant de rentrer chez eux. En revanche, tôt le matin et tard le soir, il y a beaucoup moins de ventes, car les gens dorment, travaillent ou préfèrent rester tranquillement chez eux.
 
 
 
