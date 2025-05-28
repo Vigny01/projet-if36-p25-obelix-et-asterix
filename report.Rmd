@@ -137,7 +137,7 @@ Concernant les segments, il est possible que les consommateurs génèrent plus d
 
 
 
-```{r }
+```{r, echo = FALSE}
 
 # Créer les deux graphiques
 plot1 <- ggplot(walmart, aes(x = gender, y = total, fill = gender)) +
@@ -186,7 +186,7 @@ Pour répondre on a:
 
 ### Visualisation : Produits les plus achetés
 
-```{r}
+```{r, echo = FALSE}
 library(dplyr)
 # Calculer la quantité totale par type de produit
 produits_walmart <- walmart %>%
@@ -209,7 +209,7 @@ ggplot(produits_walmart, aes(x = reorder(product_line, Total_Quantity), y = Tota
 Pour répondre à cette question, nous allons étudié deux jeux de données : Superstore, qui concerne les ventes entre entreprises (B2B), et Walmart, qui concerne les ventes aux particuliers (B2C). L'approche a utilisé se structure de la manière suivante : d'abord, nous allons extraire le jour de la semaine à partir de la date de chaque commande. Ensuite, nous allons additionner les ventes totales pour chaque jour. Enfin, nous allons représenter ces résultats sous forme de graphiques en barres (barplots). Nous espérons obtenir après cette analyse, qu'il y aura: une activité principalement concentrée dans la semaine pour Superstore, et des ventes plus élevées le week-end pour Walmart
 
 ### Superstore - Ventes par jour de la semaine
-```{r}
+```{r, echo = FALSE}
 superstore <- superstore %>%
   mutate(Order_Date = as.Date(`Order Date`, format="%d-%m-%y"),
          DayOfWeek = weekdays(Order_Date)) %>%
@@ -233,7 +233,7 @@ On constate sur le graphique que: le mercredi, il y a très peu de ventes, le lu
 
 ### Walmart - Ventes par jour de la semaine
 
-```{r}
+```{r, echo = FALSE}
 
 walmart <- walmart %>%
   mutate(
@@ -293,7 +293,7 @@ Notre approche comporte plusieurs étapes :
 
 #### Partie 1 - Scatter plot : Discount vs Profit
 
-```{r message=FALSE}
+```{r message=FALSE, echo = FALSE}
 library(ggplot2)
 library(dplyr)
 library(readr)
@@ -314,7 +314,7 @@ ggplot(superstore, aes(x = Discount, y = Profit)) +
 
 #### Partie 2 - Boxplot : Profit par groupe de Discount
 
-```{r}
+```{r, echo = FALSE}
 # Nettoyer les données
 superstore_clean <- superstore %>%
   filter(!is.na(Discount), !is.na(Profit))
@@ -389,7 +389,7 @@ Nous utiliserons un diagramme en barres pour analyser les données, car les cat�
 
 #### Bar chart: product_line et gross_income
 
-```{r message=FALSE}
+```{r message=FALSE, echo = FALSE}
 library(dplyr)
 library(readr)
 library(ggplot2)
@@ -427,13 +427,95 @@ Nous pouvons observer que les produits du supermarché Walmart sont répartis en
 Toutefois, il est important de noter que l'écart entre eux n'est pas très important. Pour certains produits, la différence de bénéfices ne dépasse même pas 2%. De plus, tous les bénéfices dépassent 2000 dollars. Étant donné que les données collectées peuvent être influencées par le contexte social et d'autres facteurs à l'époque, nous pouvons conclure qu'au premier trimestre de 2019, la vente de food and beverages générait les bénéfices les plus élevés.
 
 
+## Question 5 : Quelles catégories perdent de l’argent avec les réductions ?
+
+Pour répondre à cette question, nous allons utiliser le dataset Superstore, qui contient des informations sur les remises, profits et catégories de produits.
+Nous chercherons à analyser l'effet des niveaux de remise sur le profit moyen par catégorie, afin d’identifier celles qui deviennent non rentables lorsque des réductions sont appliquées.
+
+### Visualisation
+
+```{r message=FALSE, warning=FALSE, echo = FALSE}
+# Nettoyage des données : s'assurer qu'il n'y a pas de NA dans les variables clés
+superstore_clean <- superstore %>%
+  filter(!is.na(Discount), !is.na(Profit), !is.na(Category))
+
+# Calculer le profit moyen par catégorie selon les niveaux de remise
+profit_by_discount <- superstore_clean %>%
+  mutate(remise = case_when(
+    Discount == 0 ~ "0%",
+    Discount > 0 & Discount <= 0.2 ~ "0-20%",
+    Discount > 0.2 & Discount <= 0.4 ~ "20-40%",
+    Discount > 0.4 ~ ">40%"
+  )) %>%
+  group_by(Category, remise) %>%
+  summarise(profit_moyen = mean(Profit), .groups = "drop")
+
+# Visualisation
+ggplot(profit_by_discount, aes(x = remise, y = profit_moyen, fill = Category)) +
+  geom_col(position = "dodge") +
+  labs(
+    title = "Profit moyen par niveau de remise et catégorie",
+    x = "Niveau de remise",
+    y = "Profit moyen",
+    fill = "Catégorie"
+  ) +
+  theme_minimal()
+```
+
+### Analyse
+On observe que toutes les catégories deviennent non rentables lorsque la remise dépasse 40%. En particulier, la catégorie Technology affiche une perte moyenne très importante, proche de -800.
+
+La catégorie Furniture enregistre également des pertes dès le niveau de 20–40% de remise, avec un profit moyen négatif.
+
+En revanche, des remises plus faibles (entre 0 et 20%) restent généralement rentables pour toutes les catégories, notamment Technology, qui affiche un profit moyen positif dans cette tranche.
+
+Cela suggère que les remises élevées (> 40%) sont globalement désavantageuses, et que leur impact varie fortement selon la catégorie de produit.
+
+
+## Question 9 – Quelle catégorie a la plus grosse marge ?
+
+Pour répondre à cette question, nous allons analyser le dataset **Superstore**, en nous concentrant sur la **marge bénéficiaire totale** (Profit) pour chaque **catégorie de produit**.  
+Nous allons visualiser la répartition des profits à l’aide d’un graphique circulaire (pie chart), afin d’identifier la catégorie la plus rentable.
+
+### Visualisation
+
+```{r message=FALSE, warning=FALSE, echo = FALSE}
+
+Sys.setlocale("LC_ALL", "fr_FR.UTF-8")
+
+# Nettoyage des données
+superstore_clean <- superstore %>%
+  filter(!is.na(Category), !is.na(Profit))
+
+# Calcul du profit total par catégorie
+marge_par_categorie <- superstore_clean %>%
+  group_by(Category) %>%
+  summarise(marge_totale = sum(Profit), .groups = "drop") %>%
+  mutate(pourcentage = marge_totale / sum(marge_totale) * 100,
+         etiquette = paste0(Category, " (", round(pourcentage, 1), "%)"))
+
+# Visualisation
+ggplot(marge_par_categorie, aes(x = "", y = marge_totale, fill = Category)) +
+  geom_col(width = 1, color = "white") +
+  coord_polar(theta = "y") +
+  geom_text(aes(label = etiquette), position = position_stack(vjust = 0.5), size = 4) +
+  labs(
+    title = "Répartition des marges par catégorie",
+    fill = "Catégorie"
+  ) +
+  theme_void()
+
+```
+
+
+
 ## Question 20 : À quelle heure achète-t-on le plus ?
 
 Pour répondre à cette question, nous allons utiliser le jeu de données Walmart. Deux variables vont être étudiées : tme, qui correspond à l'heure de la transaction, et total, qui indique le montant de la vente. L'approche à utiliser se structure de la manière suivante : d'abord, nous allons extraire l'heure à partir de la variable tme. Ensuite, nous allons additionner les ventes totales pour chaque heure. Enfin, nous allons représenter ces résultats sous forme de graphique en barres (barplot). Nous espérons obtenir après cette analyse qu'il y aura : un pic de ventes autour de midi, et un second pic en fin de journée.
 
 ### Walmart - Répartition des ventes par heure
 
-```{r}
+```{r, echo = FALSE}
 walmart_time <- walmart_time %>%
   mutate(Hour = hour(hms(tme))) %>%
   group_by(Hour) %>%
