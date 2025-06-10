@@ -472,6 +472,35 @@ En revanche, des remises plus faibles (entre 0 et 20%) restent généralement re
 Cela suggère que les remises élevées (> 40%) sont globalement désavantageuses, et que leur impact varie fortement selon la catégorie de produit.
 
 
+## Question 6 :Les choses chères sont-elles mieux notées ?
+
+### Méthode
+
+Pour répondre à cette question, nous nous concentrerons principalement sur deux paramètres : 
+**unit_price** : ce paramètre indique le prix unitaire des produits, et **rating** : ce paramètre reflète la satisfaction des clients à travers leur évaluation.
+
+Nous utiliserons un diagramme de dispersion pour analyser les données. Bien que le prix et la note soient des variables numériques, ils peuvent être considérés comme discrétisables afin de mieux visualiser leur relation. En observant la distribution des points, nous pourrons déterminer s’il existe une tendance entre le prix et la note, par exemple si les produits plus chers sont mieux notés ou s’il n’y a pas de lien clair.
+
+### Visualisation
+
+#### Scatter: Unit_price et rating
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+ggplot(data, aes(x = unit_price, y = rating)) +
+  geom_point(alpha = 0.6, color = "steelblue") +
+  labs(title = "Scatter Plot of Unit Price vs Rating",
+       x = "Unit Price",
+       y = "Rating") +
+  theme_minimal()
+```
+
+
+### Résultat et Conclusion
+
+Si les produits plus chers avaient tendance à être mieux notés, les points seraient approximativement alignés en bande sur le graphique. Cependant, en observant le nuage de points, on constate que les données sont réparties de manière assez uniforme et désordonnée sur l'ensemble du graphique. On peut donc conclure qu’il n’existe pas de relation directe entre le prix unitaire et la note.
+De plus, nous avons remarqué une observation intéressante : quelle que soit la valeur du prix unitaire, la note attribuée est toujours supérieure ou égale à 4.
+
+
 ## Question 9 – Quelle catégorie a la plus grosse marge ?
 
 Pour répondre à cette question, nous allons analyser le dataset **Superstore**, en nous concentrant sur la **marge bénéficiaire totale** (Profit) pour chaque **catégorie de produit**.  
@@ -506,6 +535,86 @@ ggplot(marge_par_categorie, aes(x = "", y = marge_totale, fill = Category)) +
   theme_void()
 
 ```
+
+
+## Question 10 :Quel moment de la journée rapporte le plus ?
+
+### Méthode
+
+Pour répondre à cette question, nous nous concentrerons principalement sur deux paramètres :
+**time_of_day** : ce paramètre indique le moment de la journée où l’achat a été effectué, et
+**gross_income** : ce paramètre représente le revenu brut généré par la transaction.
+
+Nous utiliserons un diagramme en barres pour analyser les données, car les tranches horaires sont des catégories discrètes et les revenus sont des valeurs numériques continues. En comparant le revenu total généré à chaque moment de la journée, nous pourrons identifier la période la plus rentable, et ainsi déterminer quel moment de la journée rapporte le plus.
+
+
+### Visualisation
+
+#### Bar chart: time_of_day et gross_income
+```{r echo=FALSE, message=FALSE, warning=FALSE, error=FALSE}
+
+income_by_time <- data %>%
+  group_by(time_of_day) %>%
+  summarise(total_income = sum(gross_income, na.rm = TRUE)) %>%
+  arrange(desc(total_income))
+
+income_by_time$time_of_day <- factor(income_by_time$time_of_day,
+                                     levels = c("morning", "afternoon", "evening"))
+income_by_time <- income_by_time %>%
+  mutate(percent = total_income / sum(total_income) * 100,
+         label = paste0(round(percent, 1), "%\n$", round(total_income, 1)))
+
+ggplot(income_by_time, aes(x = 2, y = total_income, fill = time_of_day)) +
+  geom_bar(stat = "identity", width = 1, color = "white") +
+  coord_polar(theta = "y", start = 0) +
+  xlim(0.5, 2.5) +
+  geom_text(aes(label = label), position = position_stack(vjust = 0.5), color = "white") +
+  labs(title = "Répartition du revenu par tranche horaire de la journée") +
+  theme_void() +
+  theme(legend.title = element_blank())
+```
+
+
+### Résultat et Conclusion
+
+D’après le diagramme en barres, on peut clairement observer que les ventes du matin génèrent le moins de bénéfices, suivies de l’après-midi, tandis que les ventes du soir rapportent le plus. De plus, les bénéfices du matin représentent moins de la moitié de ceux de l’après-midi, alors que la différence entre l’après-midi et le soir n’est pas très marquée.
+
+Cela m’a fait penser au cours Éthique et biais de visualisation : comme les tranches horaires du champ time_of_day sont déjà prédéfinies dans le jeu de données, nous ne connaissons pas la répartition exacte des heures. Il est donc possible que, si l’intervalle de l’après-midi avait été légèrement élargi lors de la collecte des données, cela aurait pu inverser les résultats et faire apparaître l’après-midi comme la période la plus rentable. Ce constat est assez intéressant.
+
+
+## Question 15 :Est-ce que la façon de payer change le prix moyen ?
+
+### Méthode
+
+Pour répondre à cette question, nous allons nous concentrer sur deux paramètres :
+
+**payment_method** : ce paramètre indique le mode de paiement utilisé par le client.
+
+**total**: ce paramètre représente le montant total payé par le client lors de l’achat.
+
+Nous allons utiliser un diagramme en boîte (boxplot) pour visualiser la distribution des montants en fonction des différentes méthodes de paiement. Le boxplot permet de représenter de manière claire la médiane, les quartiles ainsi que les valeurs aberrantes, ce qui nous aide à déterminer si certains moyens de paiement sont associés à des niveaux de dépenses différents, et donc si la méthode de paiement a une influence sur le montant payé par les clients.
+
+
+### Visualisation
+
+#### Boxplot: payment_method et total
+```{r echo=FALSE, message=FALSE, warning=FALSE, error=FALSE}
+
+
+ggplot(data, aes(x = payment_method, y = total, fill = payment_method)) +
+  geom_boxplot(alpha = 0.7) +
+  labs(title = "Répartition du montant total des dépenses selon les différents modes de paiement",
+       x = "payment_method",
+       y = "Total") +
+  theme_minimal() +
+  theme(legend.position = "none")
+```
+
+
+### Résultat et Conclusion
+Les trois méthodes de paiement (espèces, portefeuille électronique, carte de crédit) ne présentent pas de différences significatives en termes de montant moyen payé, leurs médianes étant relativement proches.
+La distribution des montants est également similaire entre les différentes méthodes, avec un nombre et une répartition des valeurs aberrantes globalement comparables.
+Par conséquent, on peut considérer qu’il n’y a pas d’influence notable de la méthode de paiement sur le montant moyen des achats.
 
 
 
