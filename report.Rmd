@@ -536,6 +536,19 @@ ggplot(marge_par_categorie, aes(x = "", y = marge_totale, fill = Category)) +
 
 ```
 
+### Analyse
+Le graphique montre la répartition des marges (profits totaux) entre les trois catégories de produits.
+
+On observe que :
+
+La catégorie Technology génère la plus grosse marge, représentant 50,8 % de la marge totale. Cela indique une forte rentabilité globale de cette catégorie, malgré les pertes occasionnelles en cas de fortes remises.
+
+La catégorie Office Supplies arrive en deuxième position avec 42,8 % des marges. Elle semble relativement stable en termes de rentabilité.
+
+En revanche, la catégorie Furniture ne représente que 6,4 % des marges totales, ce qui souligne une faible contribution au profit global de l’entreprise. Cette faible marge peut s’expliquer par une sensibilité plus forte aux remises ou des coûts plus élevés.
+
+En résumé, la technologie est le moteur principal de la rentabilité, tandis que le mobilier semble le moins performant sur le plan des marges.
+
 
 ## Question 10 :Quel moment de la journée rapporte le plus ?
 
@@ -581,6 +594,87 @@ D’après le diagramme en barres, on peut clairement observer que les ventes du
 
 Cela m’a fait penser au cours Éthique et biais de visualisation : comme les tranches horaires du champ time_of_day sont déjà prédéfinies dans le jeu de données, nous ne connaissons pas la répartition exacte des heures. Il est donc possible que, si l’intervalle de l’après-midi avait été légèrement élargi lors de la collecte des données, cela aurait pu inverser les résultats et faire apparaître l’après-midi comme la période la plus rentable. Ce constat est assez intéressant.
 
+## Question 13 :Quelle région est la plus performante en termes de rentabilité ?
+
+### Méthode
+Pour cette analyse, nous avons utilisé le jeu de données Superstore, en nous concentrant sur trois variables clés :
+
+Region : la région géographique (East, West, South, Central)
+
+Sales : le chiffre d’affaires
+
+Profit : le bénéfice
+
+Nous avons procédé en deux étapes :
+
+Agrégation des données par région, pour obtenir :
+
+Le total des ventes
+
+Le total des profits
+
+La marge bénéficiaire (Profit / Sales)
+
+Visualisation via un treemap :
+
+La taille de chaque bloc représente le volume des ventes
+
+La couleur reflète la marge bénéficiaire
+
+Un code couleur du rouge (moins rentable) au vert (plus rentable) facilite l’interprétation visuelle
+
+### Visualisation
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, error=FALSE}
+if (!requireNamespace("treemapify", quietly = TRUE)) {
+  install.packages("treemapify")
+}
+
+library(treemapify)
+
+# Préparation des données : calcul par région
+region_profitability <- superstore %>%
+  filter(!is.na(Sales), !is.na(Profit), !is.na(Region)) %>%
+  group_by(Region) %>%
+  summarise(
+    total_sales = sum(Sales),
+    total_profit = sum(Profit),
+    profit_margin = total_profit / total_sales,
+    .groups = "drop"
+  )
+
+# Treemap avec des couleurs plus douces
+ggplot(region_profitability, 
+       aes(area = total_sales, 
+           fill = profit_margin, 
+           label = paste0(Region, "\n", round(profit_margin*100, 1), "%"))) +
+  geom_treemap() +
+  geom_treemap_text(colour = "white", place = "centre", grow = TRUE, reflow = TRUE) +
+  scale_fill_gradient2(
+    low = "#B22222",    
+    mid = "#F0E68C",    
+    high = "#228B22",   
+    midpoint = mean(region_profitability$profit_margin),
+    name = "Marge bénéficiaire"
+  ) +
+  labs(title = "Rentabilité par région (taille = ventes, couleur = marge)") +
+  theme_minimal()
+
+
+```
+
+### Analyse
+La région West se démarque nettement avec la plus forte marge bénéficiaire : 14.9%.
+
+Elle est suivie par East (13.5%) et South (11.9%), qui présentent également une rentabilité raisonnable.
+
+En revanche, la région Central affiche la rentabilité la plus faible, avec une marge de seulement 7.9%.
+
+En termes de volume de ventes (taille des blocs), East et West ont des ventes plus importantes que South et Central, ce qui signifie qu’elles combinent à la fois volume et rentabilité.
+
+Le treemap permet ici une visualisation doublement efficace : il nous montre où se réalisent les ventes et dans quelle mesure ces ventes sont profitables.
+
+Cette analyse suggère que pour maximiser la rentabilité, l’entreprise pourrait étudier les pratiques commerciales mises en œuvre dans la région West, et envisager des actions correctives dans la région Central.
 
 ## Question 15 :Est-ce que la façon de payer change le prix moyen ?
 
@@ -616,6 +710,84 @@ Les trois méthodes de paiement (espèces, portefeuille électronique, carte de 
 La distribution des montants est également similaire entre les différentes méthodes, avec un nombre et une répartition des valeurs aberrantes globalement comparables.
 Par conséquent, on peut considérer qu’il n’y a pas d’influence notable de la méthode de paiement sur le montant moyen des achats.
 
+## Question 17 :Quelle boutique gagne le plus d’argent ?
+
+### Méthode
+
+Pour identifier la boutique (ville) la plus rentable, nous avons :
+
+Agrégé les profits totaux par ville (City)
+
+Conserver la région (Region) pour visualiser les différences géographiques
+
+Sélectionné les 30 villes les plus rentables
+
+Utilisé un graphe en nuage de bulles (Bubble Cloud) : la taille des bulles représente le profit total, la couleur la région
+
+Ce type de visualisation est plus expressif qu’un simple diagramme en barres : il attire l’attention sur les villes les plus profitables tout en offrant une vision globale de la répartition.
+
+### Visualisation
+```{r echo=FALSE, message=FALSE, warning=FALSE, error=FALSE}
+if (!requireNamespace("packcircles", quietly = TRUE)) {
+  install.packages("packcircles")
+}
+if (!requireNamespace("ggrepel", quietly = TRUE)) {
+  install.packages("ggrepel")
+}
+
+library(packcircles)
+library(ggplot2)
+library(ggrepel)
+library(dplyr)
+
+city_profit <- superstore %>%
+  filter(!is.na(City), !is.na(Profit)) %>%
+  group_by(City, Region) %>%
+  summarise(profit_total = sum(Profit), .groups = "drop") %>%
+  arrange(desc(profit_total)) %>%
+  slice_max(profit_total, n = 30)
+
+packing <- circleProgressiveLayout(city_profit$profit_total, sizetype = 'area')
+city_profit <- cbind(city_profit, packing)
+
+dat.gg <- circleLayoutVertices(packing, npoints = 50)
+
+ggplot() + 
+  geom_polygon(data = dat.gg, aes(x, y, group = id, fill = city_profit$Region[id]), colour = "white", alpha = 0.8) +
+  geom_text(data = city_profit, aes(x, y, label = City), size = 3, color = "black") +
+  scale_fill_brewer(palette = "Set2") +
+  theme_void() +
+  coord_equal() +
+  labs(
+    title = "Top 30 des boutiques les plus rentables",
+    subtitle = "Taille des bulles = profit total, couleur = région",
+    fill = "Région"
+  )
+
+```
+
+### Analyse
+
+Le graphique met en évidence les 30 boutiques (villes) les plus rentables à travers un nuage de bulles :
+
+La ville la plus rentable est New York City, avec la plus grande bulle, représentant un profit total nettement supérieur aux autres. Elle appartient à la région South (couleur orange clair).
+
+Viennent ensuite Los Angeles, Seattle et San Francisco, toutes trois situées dans la région West (rose), montrant que cette région concentre plusieurs boutiques fortement profitables.
+
+La taille des bulles permet de comparer visuellement les profits totaux, tandis que les couleurs indiquent la répartition géographique :
+
+West domine en nombre de boutiques rentables dans ce top 30.
+
+South est représentée en tête avec New York City.
+
+East et Central sont présentes, mais avec des bulles globalement plus petites, ce qui suggère des profits moins élevés.
+
+Ce type de visualisation permet de comparer rapidement les performances financières des boutiques tout en localisant leur région, offrant ainsi une analyse à double entrée (rentabilité + géographie).
+
+Conclusion:
+La boutique générant le plus de profit est New York City, située dans la région South.
+
+Les régions West et South dominent clairement en termes de rentabilité parmi les 30 meilleures boutiques, ce qui pourrait orienter les décisions stratégiques futures, comme l’ouverture de nouvelles boutiques ou la priorisation des investissements.
 
 ## Question 18 :Une réduction pousse-t-elle à acheter plus ?
 
