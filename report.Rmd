@@ -545,7 +545,7 @@ Pour répondre à cette question, nous nous concentrerons principalement sur deu
 **time_of_day** : ce paramètre indique le moment de la journée où l’achat a été effectué, et
 **gross_income** : ce paramètre représente le revenu brut généré par la transaction.
 
-Nous utiliserons un diagramme en barres pour analyser les données, car les tranches horaires sont des catégories discrètes et les revenus sont des valeurs numériques continues. En comparant le revenu total généré à chaque moment de la journée, nous pourrons identifier la période la plus rentable, et ainsi déterminer quel moment de la journée rapporte le plus.
+Nous allons utiliser le graphique en Dount Chart pour analyser les données, car il est plus facile de visualiser le pourcentage des revenus au fil du temps pour différentes périodes. En comparant le revenu total généré à chaque moment de la journée, nous serons en mesure d’identifier les périodes les plus rentables et ainsi déterminer quel moment de la journée rapporte le plus d’argent.
 
 
 ### Visualisation
@@ -616,6 +616,39 @@ Les trois méthodes de paiement (espèces, portefeuille électronique, carte de 
 La distribution des montants est également similaire entre les différentes méthodes, avec un nombre et une répartition des valeurs aberrantes globalement comparables.
 Par conséquent, on peut considérer qu’il n’y a pas d’influence notable de la méthode de paiement sur le montant moyen des achats.
 
+
+## Question 18 :Une réduction pousse-t-elle à acheter plus ?
+
+### Méthode
+
+Pour répondre à cette question, nous allons nous concentrer sur deux paramètres :
+
+**Discount**: Remise appliquée.
+
+**Quantity** : Nombre d’unités vendues.
+
+
+Nous utiliserons un graphique de dispersion pour visualiser la relation entre la remise et la quantité d'achat correspondante pour chaque transaction. Si le phénomène de "réductions plus importantes, plus d'achats" est vrai, nous pouvons observer une tendance de corrélation positive dans le graphique (les points de données sont distribués en bas de gauche en haut à droite). Inversement, s'il n'y a pas de modèle évident, cela peut indiquer que la remise a peu d'impact sur la quantité d'achat.
+
+### Visualisation
+
+#### Line chart: Discount et Quantity
+```{r echo=FALSE, message=FALSE, warning=FALSE, error=FALSE}
+data_superStore <- read_delim(
+  "data/superstore.csv",
+)
+
+ggplot(data_superStore, aes(x = Discount, y = Quantity)) +
+  geom_point(alpha = 0.5, color = "steelblue") +
+  labs(title = "Relation entre la réduction et la quantité achetée",
+       x = "Réduction (Discount)",
+       y = "Quantité achetée") +
+  theme_minimal()
+```
+
+
+### Résultat et Conclusion
+Les parcelles de dispersion montrent que la plupart des transactions sont effectuées à faible remise et que le nombre d'achats est généralement stable. Le nombre de ventes dans différentes remises est essentiellement la distribution d'évaluation.En d'autres termes, dans cet ensemble de données, les remises ne semblent pas encourager clairement les clients à acheter plus.
 
 
 ## Question 20 : À quelle heure achète-t-on le plus ?
